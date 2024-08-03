@@ -22,7 +22,7 @@ mod logger {
     use mhw_toolkit::logger::MHWLogger;
     use once_cell::sync::Lazy;
 
-    static LOGGER: Lazy<MHWLogger> = Lazy::new(|| MHWLogger::new("UnlimitedInsurance"));
+    static LOGGER: Lazy<MHWLogger> = Lazy::new(|| MHWLogger::new(env!("CARGO_PKG_NAME")));
 
     pub fn init_log() {
         log::set_logger(&*LOGGER).unwrap();
@@ -50,8 +50,8 @@ enum Color {
 }
 
 impl Color {
-    pub fn from_i32(i: i32) -> Option<Self> {
-        match i {
+    pub fn from_i8(value: i8) -> Option<Self> {
+        match value {
             0 => Some(Color::White),
             1 => Some(Color::Green),
             2 => Some(Color::Orange),
@@ -128,8 +128,8 @@ fn load_global_config() -> anyhow::Result<()> {
     let config_str = config_str.trim();
     info!("Read config: `{}`", config_str);
     unsafe {
-        if let Ok(config_int) = config_str.parse::<i32>() {
-            CONFIG_COLOR = Color::from_i32(config_int).unwrap_or_default();
+        if let Ok(config_int) = config_str.parse::<i8>() {
+            CONFIG_COLOR = Color::from_i8(config_int).unwrap_or_default();
         } else {
             CONFIG_COLOR = Color::from_str(config_str).unwrap_or_default();
         }
@@ -141,6 +141,10 @@ fn load_global_config() -> anyhow::Result<()> {
 
 fn main_entry() -> anyhow::Result<()> {
     logger::init_log();
+    info!(
+        "CustomNameColor plugin version: {}",
+        env!("CARGO_PKG_VERSION")
+    );
 
     // load config
     load_global_config()
